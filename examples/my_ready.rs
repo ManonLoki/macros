@@ -5,6 +5,17 @@ use std::{
 
 use futures::Future;
 
+// my_ready! => Pool:Ready / Pool::Pending
+#[macro_export]
+macro_rules! my_ready {
+    ($x:expr) => {
+        match $x {
+            std::task::Poll::Ready(v) => std::task::Poll::Ready(v),
+            std::task::Poll::Pending => return std::task::Poll::Pending,
+        }
+    };
+}
+
 #[tokio::main]
 async fn main() {
     let fut = MyFut::new(10);
