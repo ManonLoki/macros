@@ -1,4 +1,4 @@
-use proc_macro::TokenStream;
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
@@ -44,5 +44,4 @@ pub(crate) fn process_enum_from(input: DeriveInput) -> TokenStream {
     quote! {
         #(#from_impls)*
     }
-    .into()
 }

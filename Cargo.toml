@@ -16,6 +16,7 @@ tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 
 [dependencies]
+darling = "0.20.8"
 expand = "0.3.0"
 proc-macro2 = "1.0.82"
 quote = "1.0.36"
