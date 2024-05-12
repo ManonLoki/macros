@@ -1,5 +1,7 @@
+use core::panic;
+
 use darling::{
-    ast::{self},
+    ast::{self, Data},
     util, FromDeriveInput, FromField, FromVariant,
 };
 use proc_macro2::TokenStream;
@@ -32,27 +34,17 @@ pub struct EnumFromField {
 
 /// 处理EnumFrom
 pub(crate) fn process_enum_from(input: DeriveInput) -> TokenStream {
-    let from_derive_input = match EnumFromDeriveInput::from_derive_input(&input) {
-        Ok(input) => input,
-        Err(e) => panic!("parse from derive input error:{:#?}", e),
-    };
-
-    // 枚举的标识符
-    let enum_ident = from_derive_input.ident;
-
-    // 获取泛型
-    let generics = from_derive_input.generics;
-
-    println!("from_derive_input:{:#?}", generics);
-
-    // 获取变量
-    let variants = match from_derive_input.data {
-        ast::Data::Enum(data_enum) => data_enum,
-        _ => panic!("only support enum "),
+    let EnumFromDeriveInput {
+        ident,
+        generics,
+        data: Data::Enum(data),
+    } = EnumFromDeriveInput::from_derive_input(&input).expect("Parse Input Error")
+    else {
+        panic!("Only support enum")
     };
 
     // 处理每一个variant
-    let from_impls = variants.iter().map(|variant| {
+    let from_impls = data.iter().map(|variant| {
         let variant_ident = &variant.ident;
 
         // 处理不是unname的以及不为1的
@@ -65,9 +57,9 @@ pub(crate) fn process_enum_from(input: DeriveInput) -> TokenStream {
 
         // 生成From代码
         quote! {
-            impl #generics From<#field_type> for #enum_ident #generics {
+            impl #generics From<#field_type> for #ident #generics {
                 fn from(value: #field_type) -> Self {
-                    #enum_ident::#variant_ident(value)
+                    #ident::#variant_ident(value)
                 }
             }
         }
